@@ -6,9 +6,11 @@ import { AppService } from './app.service';
 import * as Joi from 'joi';
 import { PostgresConfigModule } from 'config/database/postgres/config.module';
 import { PostgresConfigService } from 'config/database/postgres/config.service';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+
 import { AuthModule } from 'domain/auth/auth.module';
 import { UsersModule } from 'domain/users/users.module';
-import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { ScheduleModule } from 'domain/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -42,13 +44,6 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
         HTTP_TIMEOUT: Joi.number().required(),
         HTTP_MAX_REDIRECTS: Joi.number().required(),
         SOCKET_SERVER: Joi.string().required(),
-        MAX_WALK_POINT: Joi.number().required(),
-        DISTANCE_PER_POINT: Joi.number().required(),
-        MAX_JOIN: Joi.number().required(),
-        BONE_PER_POINT: Joi.number().required(),
-        MAX_BONE_COUNT: Joi.number().required(),
-        MAX_DISTANCE: Joi.number().required(),
-        POINT_METER: Joi.number().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -59,6 +54,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     
     UsersModule,
     AuthModule,
+    ScheduleModule
   
   ],
   controllers: [AppController],

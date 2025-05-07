@@ -22,7 +22,6 @@ export class UsersService {
 
   constructor(
     private readonly usersRepository: UsersRepository,
-    // private readonly dataSource: DataSource
     private readonly configService: ConfigService
   ) { }
 
@@ -31,7 +30,7 @@ export class UsersService {
 
     const existing = await this.usersRepository.selectUserByEmail(email, Provider.Local);
     if (existing) {
-      throw new HttpException(Errors.User['DUPLICATED_EMAIL'], Errors.User['DUPLICATED_EMAIL'].code);
+      throw new HttpException(Errors.User['DUPLICATED_EMAIL'], Errors.User['DUPLICATED_EMAIL'].statusCode);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -50,7 +49,7 @@ export class UsersService {
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.usersRepository.selectUserByEmail(email, Provider.Local);
     if (!user) {
-      throw new HttpException(Errors.User['USER_NOT_FOUND'], Errors.User['USER_NOT_FOUND'].code);
+      throw new HttpException(Errors.User['USER_NOT_FOUND'], Errors.User['USER_NOT_FOUND'].statusCode);
     }
     return user;
   }
@@ -58,7 +57,7 @@ export class UsersService {
   async findUserById(id: number): Promise<User> {
     const user = await this.usersRepository.selectUserById(id);
     if (!user) {
-      throw new HttpException(Errors.User['USER_NOT_FOUND'], Errors.User['USER_NOT_FOUND'].code);
+      throw new HttpException(Errors.User['USER_NOT_FOUND'], Errors.User['USER_NOT_FOUND'].statusCode);
     }
     return user;
   }

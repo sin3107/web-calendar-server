@@ -10,7 +10,7 @@ export class JwtAuthGuard extends AuthGuard('local') {
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
       throw (
-        err || new HttpException(Errors.User['VALIDATE_FAIL'], Errors.User['VALIDATE_FAIL'].code)
+        err || new HttpException(Errors.User['VALIDATE_FAIL'], Errors.User['VALIDATE_FAIL'].statusCode)
       );
     }
     return user;

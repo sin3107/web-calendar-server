@@ -7,6 +7,6 @@ export const UserSuccessDefine: Record<Keys, SuccessResponseOption & { code: str
     model: EmailCheckResponseDTO,
     exampleDescription: '이메일이 중복되면 true, 아니면 false',
     exampleTitle: '이메일 중복 체크',
-    code: 'User-S002',
+    code: 'User-S001',
   }
 };

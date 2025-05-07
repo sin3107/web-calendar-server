@@ -1,17 +1,12 @@
 import {
     Injectable,
     Logger,
-    UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Equal, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { Provider, User } from 'domain/users/entities/user.entity';
-import { Profile } from 'domain/users/entities/profile.entity';
-import { UserRegisterRequestDTO } from 'domain/auth/dtos/request/UserRegister.request.dto';
-import { UserRegisterResponseDTO } from 'domain/auth/dtos/response/UserRegister.response.dto';
-import { UpdateUserRefreshTokenRequestDto } from './dtos/request/UpdateUserRefreshToken.request.dto';
+import { UpdateUserRefreshTokenRequestDTO } from './dtos/request/UpdateUserRefreshToken.request.dto';
 
 
 @Injectable()
@@ -21,10 +16,6 @@ export class UsersRepository {
     constructor(
         @InjectRepository(User)
         private readonly usersRepository: Repository<User>,
-        @InjectRepository(Profile)
-        private readonly profileRepository: Repository<Profile>,
-        private readonly dataSource: DataSource,
-        private readonly configService: ConfigService,
     ) { }
 
     buildUserEntity(userData: Partial<User>): User {
@@ -35,7 +26,7 @@ export class UsersRepository {
         return await this.usersRepository.save(user);
     }
 
-    async updateUserRefresh(id: number, requestDto: UpdateUserRefreshTokenRequestDto) {
+    async updateUserRefresh(id: number, requestDto: UpdateUserRefreshTokenRequestDTO) {
         const {refreshToken, refreshExp} = requestDto
 
         await this.usersRepository.update(id, {

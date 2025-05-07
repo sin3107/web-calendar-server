@@ -1,6 +1,6 @@
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class UpdateUserRefreshTokenRequestDto {
+export class UpdateUserRefreshTokenRequestDTO {
 
   @IsString()
   @IsNotEmpty()

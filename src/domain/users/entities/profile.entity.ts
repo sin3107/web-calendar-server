@@ -12,7 +12,7 @@ import { User } from 'domain/users/entities/user.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity({
-  name: 'USER_PROFILE',
+  name: 'user_profiles',
 })
 export class Profile extends BaseEntity {
   @PrimaryColumn()

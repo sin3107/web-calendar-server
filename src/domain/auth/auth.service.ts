@@ -87,7 +87,7 @@ export class AuthService {
       await queryRunner.rollbackTransaction();
       throw new HttpException(
         Errors.Auth['SOCIAL_SIGNUP_FAIL'],
-        Errors.Auth['SOCIAL_SIGNUP_FAIL'].code
+        Errors.Auth['SOCIAL_SIGNUP_FAIL'].statusCode
       );
     } finally {
       await queryRunner.release();
@@ -132,7 +132,7 @@ export class AuthService {
     if (!user.refreshToken) {
       throw new HttpException(
         Errors.User['REFRESH_TOKEN_NOT_FOUND'],
-        Errors.User['REFRESH_TOKEN_NOT_FOUND'].code
+        Errors.User['REFRESH_TOKEN_NOT_FOUND'].statusCode
       );
     }
 
@@ -141,7 +141,7 @@ export class AuthService {
     if (!isRefreshTokenMatching) {
       throw new HttpException(
         Errors.User['REFRESH_TOKEN_NOT_MATCH'],
-        Errors.User['REFRESH_TOKEN_NOT_MATCH'].code
+        Errors.User['REFRESH_TOKEN_NOT_MATCH'].statusCode
       );
     }
 

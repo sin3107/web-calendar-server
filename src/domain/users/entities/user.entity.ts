@@ -26,7 +26,7 @@ import {
   
   @Index('email', ['email'], { unique: false })
   @Entity({
-    name: 'USER',
+    name: 'users',
   })
   export class User extends CommonEntity {
     @Column({ type: 'varchar', unique: false, nullable: false })
