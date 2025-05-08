@@ -1,16 +1,17 @@
 import { CommonEntity } from "common/entities/common.entity";
 import { EventExceptionEntity } from "domain/schedule/event-exceptions/entites/event-exception.entity";
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { EventEntity } from "./event.entity";
 
 @Entity({
   name: "event_repeat_rules"
 })
 export class EventRepeatRuleEntity extends CommonEntity {
-  @ManyToOne(() => EventEntity, (event) => event.repeatRules, {
+  @OneToOne(() => EventEntity, (event) => event.repeatRule, {
     onDelete: 'CASCADE',
   })
-  event: Event;
+  @JoinColumn()
+  event: EventEntity;
 
   @Column({ type: 'varchar', length: 255 })
   repeatType: string;  // 매일, 매주, 매월 등

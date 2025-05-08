@@ -1,17 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 class EventSummary {
-  @ApiProperty({ example: 123, description: '일정 ID' })
-  eventId: number;
+  @ApiProperty({ example: 1 })
+  id: number;
 
-  @ApiProperty({ example: '회의', description: '일정 제목' })
+  @ApiProperty({ example: '팀 회의' })
   title: string;
 
-  @ApiProperty({ example: '2025-05-01T10:00:00Z', description: '시작 시간' })
+  @ApiProperty({ example: '2025-05-15T09:00:00Z' })
   startTime: Date;
 
-  @ApiProperty({ example: '2025-05-01T11:00:00Z', description: '종료 시간' })
+  @ApiProperty({ example: '2025-05-15T10:00:00Z' })
   endTime: Date;
+
+  @ApiProperty({ example: '서울 회의실 A', nullable: true })
+  location?: string;
+
+  @ApiProperty({ example: false })
+  isAllDay: boolean;
+
+  @ApiProperty({ example: true, description: '반복 일정 여부' })
+  isRepeat: boolean;
 }
 
 export class SelectEventListResponseDTO {

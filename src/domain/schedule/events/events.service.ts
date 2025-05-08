@@ -9,6 +9,8 @@ import { Errors } from 'common/errors/Errors';
 import { HttpException } from '@nestjs/common';
 import { CreateEventResponseDTO } from './dtos/response/CreateEvent.response.dto';
 import { UpdateAndDeleteEventResponseDTO } from './dtos/response/UpdateAndDeleteEvent.response.dto';
+import { EventRepeatRuleEntity } from './entities/event-repeat-rule.entity';
+import { SelectEventListResponseDTO } from './dtos/response/SelectEventList.response.dto';
 
 @Injectable()
 export class EventsService {
@@ -19,35 +21,68 @@ export class EventsService {
   ) { }
 
   // 특정 기간 내 일정 조회
-  async getEventsInRange(calendarId: number, dto: GetEventRequestDTO): Promise<EventEntity[]> {
+  async getEventsInRange(calendarId: number, dto: GetEventRequestDTO): Promise<SelectEventListResponseDTO> {
     const { startDate, endDate } = dto;
-    return this.eventRepository.findEventsInRange(calendarId, startDate, endDate);
+    const events = await this.eventRepository.findEventsInRange(calendarId, startDate, endDate);
+
+    return {
+      events: events.map(e => ({
+        id: e.id,
+        title: e.title,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        location: e.location,
+        isAllDay: e.isAllDay,
+        isRepeat: !!e.repeatRule
+      })),
+      totalCount: events.length,
+    };
   }
 
   // 단건 조회
   async getEventById(id: number): Promise<EventEntity> {
     const event = await this.eventRepository.findById(id);
     if (!event) {
-      throw new HttpException(Errors.Event['EVENT_NOT_FOUND'], Errors.Event['EVENT_NOT_FOUND'].statusCode);
+      throw new HttpException(
+        Errors.Event['EVENT_NOT_FOUND'],
+        Errors.Event['EVENT_NOT_FOUND'].statusCode
+      );
     }
     return event;
   }
 
+  
   // 일정 추가
   async createEvent(dto: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
     if (dto.startTime > dto.endTime) {
-      throw new HttpException(Errors.Event['INVALID_EVENT_TIME_RANGE'], Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode);
+      throw new HttpException(
+        Errors.Event['INVALID_EVENT_TIME_RANGE'],
+        Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode,
+      );
     }
     const event = {
+      calendar: { id: dto.calendarId },
       title: dto.title,
       startTime: dto.startTime,
       endTime: dto.endTime,
       location: dto.location,
       isAllDay: dto.isAllDay,
-      calendar: { id: dto.calendarId },
     } as EventEntity;
+    
+    let savedEvent: EventEntity;
 
-    const savedEvent = await this.eventRepository.saveEvent(event);
+    if (dto.repeatRule) {
+      const repeatRule = new EventRepeatRuleEntity();
+      repeatRule.repeatType = dto.repeatRule.repeatType;
+      repeatRule.repeatInterval = dto.repeatRule.repeatInterval;
+      repeatRule.repeatEndDate = dto.repeatRule.repeatEndDate;
+      repeatRule.isForever = dto.repeatRule.isForever ?? false;
+      repeatRule.repeatDaysOfWeek = dto.repeatRule.repeatDaysOfWeek;
+
+      savedEvent = await this.eventRepository.saveEventWithRepeatRule(event, repeatRule);
+    } else {
+      savedEvent = await this.eventRepository.saveEvent(event);
+    }
 
     return {
       eventId: savedEvent.id,
@@ -64,10 +99,16 @@ export class EventsService {
   async updateEvent(id: number, dto: UpdateEventRequestDTO): Promise<UpdateAndDeleteEventResponseDTO> {
     const existing = await this.eventRepository.findById(id);
     if (!existing) {
-      throw new HttpException(Errors.Event['EVENT_NOT_FOUND'], Errors.Event['EVENT_NOT_FOUND'].statusCode);
+      throw new HttpException(
+        Errors.Event['EVENT_NOT_FOUND'], 
+        Errors.Event['EVENT_NOT_FOUND'].statusCode
+      );
     }
     if (dto.startTime && dto.endTime && dto.startTime > dto.endTime) {
-      throw new HttpException(Errors.Event['INVALID_EVENT_TIME_RANGE'], Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode);
+      throw new HttpException(
+        Errors.Event['INVALID_EVENT_TIME_RANGE'], 
+        Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode
+      );
     }
     await this.eventRepository.updateEvent(id, dto);
     const updated = await this.eventRepository.findById(id);
@@ -82,7 +123,10 @@ export class EventsService {
   async deleteEvent(id: number): Promise<UpdateAndDeleteEventResponseDTO> {
     const existing = await this.eventRepository.findById(id);
     if (!existing) {
-      throw new HttpException(Errors.Event['EVENT_NOT_FOUND'], Errors.Event['EVENT_NOT_FOUND'].statusCode);
+      throw new HttpException(
+        Errors.Event['EVENT_NOT_FOUND'], 
+        Errors.Event['EVENT_NOT_FOUND'].statusCode
+      );
     }
     await this.eventRepository.deleteEvent(id);
     return {

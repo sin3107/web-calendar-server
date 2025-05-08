@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { CommonEntity } from 'common/entities/common.entity';
 import { CalendarEntity } from 'domain/schedule/calendars/entities/calendar.entity';
 import { EventExceptionEntity } from 'domain/schedule/event-exceptions/entites/event-exception.entity';
@@ -29,11 +29,10 @@ export class EventEntity extends CommonEntity {
   @Column({ default: false })
   isAllDay: boolean;
 
-  // 반복 규칙과의 관계 (1:N)
-  @OneToMany(() => EventRepeatRuleEntity, (repeatRule) => repeatRule.event, {
+  @OneToOne(() => EventRepeatRuleEntity, (repeatRule) => repeatRule.event, {
     cascade: true,
   })
-  repeatRules: EventRepeatRuleEntity[];
+  repeatRule?: EventRepeatRuleEntity;
 
   @OneToMany(() => EventExceptionEntity, (exception) => exception.event)
   exceptions: EventExceptionEntity[];

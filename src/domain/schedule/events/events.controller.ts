@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 
-import { EventEntity } from './entities/event.entity';
 import { EventsService } from './events.service';
 import { GetEventRequestDTO } from './dtos/request/GetEvent.request.dto';
 
@@ -24,6 +23,7 @@ import { CreateEventRequestDTO } from './dtos/request/CreateEvent.request.dto';
 import { UpdateEventRequestDTO } from './dtos/request/UpdateEvent.request.dto';
 import { UpdateAndDeleteEventResponseDTO } from './dtos/response/UpdateAndDeleteEvent.response.dto';
 import { CreateEventResponseDTO } from './dtos/response/CreateEvent.response.dto';
+import { SelectEventListResponseDTO } from './dtos/response/SelectEventList.response.dto';
 
 
 @ApiTags('Events')
@@ -47,7 +47,7 @@ export class EventsController {
     async getEventsInRange(
         @Param('calendarId') calendarId: number,
         @Query() dto: GetEventRequestDTO,
-    ): Promise<EventEntity[]> {
+    ): Promise<SelectEventListResponseDTO> {
         return this.eventService.getEventsInRange(calendarId, dto);
     }
 

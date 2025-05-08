@@ -1,5 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsDateString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsDateString, IsOptional, IsBoolean, IsNumber, ValidateNested } from 'class-validator';
+
+class RepeatRuleDTO {
+  @ApiProperty({ example: 'daily' })
+  @IsString()
+  repeatType: string;
+
+  @ApiProperty({ example: 1, required: false })
+  @IsOptional()
+  @IsNumber()
+  repeatInterval?: number;
+
+  @ApiProperty({ example: '2025-12-31T00:00:00Z', required: false })
+  @IsOptional()
+  @IsDateString()
+  repeatEndDate?: Date;
+
+  @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
+  isForever?: boolean;
+
+  @ApiProperty({ example: ['1', '3', '5'], required: false })
+  @IsOptional()
+  repeatDaysOfWeek?: string[];
+}
 
 export class CreateEventRequestDTO {
 
@@ -24,7 +50,13 @@ export class CreateEventRequestDTO {
   @IsString()
   location?: string;
 
-  @ApiProperty({ description: '하루 종일 이벤트 여부', example: true })
+  @ApiProperty({ description: '종일 이벤트 여부', example: true })
   @IsBoolean()
   isAllDay: boolean;
+
+  @ApiProperty({ description: '반복 규칙', required: false, type: () => RepeatRuleDTO })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RepeatRuleDTO)
+  repeatRule?: RepeatRuleDTO;
 }
