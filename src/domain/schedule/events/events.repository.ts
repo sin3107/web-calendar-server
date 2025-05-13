@@ -9,16 +9,16 @@ import { generateRecurringEvents } from 'common/utils/repeatExpansion';
 export class EventsRepository {
   constructor(
     @InjectRepository(EventEntity)
-    private readonly eventRepo: Repository<EventEntity>,
+    private readonly eventRepository: Repository<EventEntity>,
 
     @InjectRepository(EventRepeatRuleEntity)
-    private readonly repeatRuleRepo: Repository<EventRepeatRuleEntity>,
+    private readonly repeatRuleRepository: Repository<EventRepeatRuleEntity>,
 
     private readonly dataSource: DataSource,
   ) {}
 
   async findEventsInRange(calendarId: number, startDate: Date, endDate: Date): Promise<EventEntity[]> {
-    const baseEvents = await this.eventRepo.createQueryBuilder('event')
+    const baseEvents = await this.eventRepository.createQueryBuilder('event')
       .leftJoinAndSelect('event.repeatRule', 'repeatRule')
       .leftJoinAndSelect('event.exceptions', 'exceptions')
       .where('event.calendar = :calendarId', { calendarId })
@@ -43,18 +43,18 @@ export class EventsRepository {
   }
 
   async findById(id: number): Promise<EventEntity | null> {
-    return this.eventRepo.findOne({
+    return this.eventRepository.findOne({
       where: { id },
       relations: ['repeatRule', 'exceptions', 'calendar'],
     });
   }
 
   async saveEvent(event: EventEntity): Promise<EventEntity> {
-    return this.eventRepo.save(event);
+    return this.eventRepository.save(event);
   }
 
   async saveRepeatRule(rule: EventRepeatRuleEntity): Promise<EventRepeatRuleEntity> {
-    return this.repeatRuleRepo.save(rule);
+    return this.repeatRuleRepository.save(rule);
   }
 
   async saveEventWithRepeatRule(event: EventEntity, rule: EventRepeatRuleEntity): Promise<EventEntity> {
@@ -67,11 +67,11 @@ export class EventsRepository {
   }
 
   async updateEvent(id: number, updatedEvent: Partial<EventEntity>): Promise<EventEntity> {
-    await this.eventRepo.update(id, updatedEvent);
-    return this.eventRepo.findOneBy({ id });
+    await this.eventRepository.update(id, updatedEvent);
+    return this.eventRepository.findOneBy({ id });
   }
 
   async deleteEvent(id: number): Promise<void> {
-    await this.eventRepo.delete(id);
+    await this.eventRepository.delete(id);
   }
 }

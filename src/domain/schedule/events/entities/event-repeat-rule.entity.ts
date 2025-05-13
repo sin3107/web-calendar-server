@@ -1,15 +1,13 @@
 import { CommonEntity } from "common/entities/common.entity";
 import { EventExceptionEntity } from "domain/schedule/event-exceptions/entites/event-exception.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import { EventEntity } from "./event.entity";
 
 @Entity({
   name: "event_repeat_rules"
 })
 export class EventRepeatRuleEntity extends CommonEntity {
-  @OneToOne(() => EventEntity, (event) => event.repeatRule, {
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(() => EventEntity, (event) => event.repeatRule)
   @JoinColumn()
   event: EventEntity;
 

@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventExceptionController } from './event-exception.controller';
+import { EventExceptionsController } from './event-exceptions.controller';
 
 describe('EventExceptionController', () => {
-  let controller: EventExceptionController;
+  let controller: EventExceptionsController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [EventExceptionController],
+      controllers: [EventExceptionsController],
     }).compile();
 
-    controller = module.get<EventExceptionController>(EventExceptionController);
+    controller = module.get<EventExceptionsController>(EventExceptionsController);
   });
 
   it('should be defined', () => {

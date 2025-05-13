@@ -11,6 +11,8 @@ import { CreateEventResponseDTO } from './dtos/response/CreateEvent.response.dto
 import { UpdateAndDeleteEventResponseDTO } from './dtos/response/UpdateAndDeleteEvent.response.dto';
 import { EventRepeatRuleEntity } from './entities/event-repeat-rule.entity';
 import { SelectEventListResponseDTO } from './dtos/response/SelectEventList.response.dto';
+import { UpdateRepeatRuleRequestDTO } from './dtos/request/UpdateRepeatRule.request.dto';
+import { UpdateRepeatRuleResponseDTO } from './dtos/response/UpdateRepeatRule.response.dto';
 
 @Injectable()
 export class EventsService {
@@ -51,7 +53,7 @@ export class EventsService {
     return event;
   }
 
-  
+
   // 일정 추가
   async createEvent(dto: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
     if (dto.startTime > dto.endTime) {
@@ -68,7 +70,7 @@ export class EventsService {
       location: dto.location,
       isAllDay: dto.isAllDay,
     } as EventEntity;
-    
+
     let savedEvent: EventEntity;
 
     if (dto.repeatRule) {
@@ -100,18 +102,18 @@ export class EventsService {
     const existing = await this.eventRepository.findById(id);
     if (!existing) {
       throw new HttpException(
-        Errors.Event['EVENT_NOT_FOUND'], 
+        Errors.Event['EVENT_NOT_FOUND'],
         Errors.Event['EVENT_NOT_FOUND'].statusCode
       );
     }
     if (dto.startTime && dto.endTime && dto.startTime > dto.endTime) {
       throw new HttpException(
-        Errors.Event['INVALID_EVENT_TIME_RANGE'], 
+        Errors.Event['INVALID_EVENT_TIME_RANGE'],
         Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode
       );
     }
-    await this.eventRepository.updateEvent(id, dto);
-    const updated = await this.eventRepository.findById(id);
+
+    const updated = await this.eventRepository.updateEvent(id, dto);
 
     return {
       eventId: updated.id,
@@ -119,12 +121,43 @@ export class EventsService {
     };
   }
 
+  // 반복 일정 수정
+  async updateRepeatRule(eventId: number, dto: UpdateRepeatRuleRequestDTO): Promise<UpdateRepeatRuleResponseDTO> {
+    const event = await this.eventRepository.findById(eventId);
+
+    if (!event) {
+      throw new HttpException(
+        Errors.Event['EVENT_NOT_FOUND'],
+        Errors.Event['EVENT_NOT_FOUND'].statusCode,
+      );
+    }
+
+    if (!event.repeatRule) {
+      throw new HttpException(
+        Errors.Event['REPEAT_RULE_NOT_FOUND'],
+        Errors.Event['REPEAT_RULE_NOT_FOUND'].statusCode,
+      );
+    }
+
+    const updatedRule = Object.assign(event.repeatRule, dto);
+    const saved = await this.eventRepository.saveRepeatRule(updatedRule);
+
+    return {
+      repeatType: saved.repeatType,
+      repeatInterval: saved.repeatInterval,
+      repeatEndDate: saved.repeatEndDate,
+      isForever: saved.isForever,
+      repeatDaysOfWeek: saved.repeatDaysOfWeek,
+    };
+  }
+
+
   // 일정 삭제
   async deleteEvent(id: number): Promise<UpdateAndDeleteEventResponseDTO> {
     const existing = await this.eventRepository.findById(id);
     if (!existing) {
       throw new HttpException(
-        Errors.Event['EVENT_NOT_FOUND'], 
+        Errors.Event['EVENT_NOT_FOUND'],
         Errors.Event['EVENT_NOT_FOUND'].statusCode
       );
     }

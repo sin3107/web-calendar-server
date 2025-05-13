@@ -31,6 +31,7 @@ export class EventEntity extends CommonEntity {
 
   @OneToOne(() => EventRepeatRuleEntity, (repeatRule) => repeatRule.event, {
     cascade: true,
+    onDelete: 'CASCADE',
   })
   repeatRule?: EventRepeatRuleEntity;
 

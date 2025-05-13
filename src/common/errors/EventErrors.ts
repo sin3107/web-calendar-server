@@ -1,9 +1,10 @@
 import { ErrorResponseOption } from 'common/decorators/ErrorResponse.decorator';
 
-type Keys = 
+type Keys =
   | 'EVENT_NOT_FOUND'
   | 'INVALID_EVENT_TIME_RANGE'
-  | 'UNAUTHORIZED_EVENT_ACCESS';
+  | 'UNAUTHORIZED_EVENT_ACCESS'
+  | 'REPEAT_RULE_NOT_FOUND';
 
 export const Event: Record<Keys, ErrorResponseOption & { code: string; statusCode: number }> = {
   EVENT_NOT_FOUND: {
@@ -27,4 +28,11 @@ export const Event: Record<Keys, ErrorResponseOption & { code: string; statusCod
     exampleDescription: '자신이 소유하지 않은 일정에 접근하려 할 때',
     message: '해당 일정에 접근할 권한이 없습니다.',
   },
+  REPEAT_RULE_NOT_FOUND: {
+    code: 'Event-E004',
+    statusCode: 404,
+    exampleTitle: '반복 규칙 없음',
+    exampleDescription: '반복 규칙이 존재하지 않음',
+    message: '반복 규칙을 찾을 수 없습니다.',
+  }
 };

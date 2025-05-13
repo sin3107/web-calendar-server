@@ -7,9 +7,9 @@ import { EventEntity } from './entities/event.entity';
 import { EventRepeatRuleEntity } from './entities/event-repeat-rule.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EventEntity, EventRepeatRuleEntity])],
+  imports: [TypeOrmModule.forFeature([EventEntity, EventRepeatRuleEntity]),],
   controllers: [EventsController],
   providers: [EventsService, EventsRepository],
   exports: [EventsService]
 })
-export class EventsModule {}
+export class EventsModule { }
