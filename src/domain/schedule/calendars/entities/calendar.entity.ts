@@ -2,9 +2,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from 'common/entities/common.entity';
 import { CalendarMemberEntity } from './calendar-member.entity';
 
-@Entity({
-  name: "calendars"
-})
+@Entity({ name: 'calendars' })
 export class CalendarEntity extends CommonEntity {
   @Column()
   name: string;
@@ -15,6 +13,11 @@ export class CalendarEntity extends CommonEntity {
   @Column({ default: false })
   isPrivate: boolean;
 
-  @OneToMany(() => CalendarMemberEntity, (member) => member.calendar)
+  @Column({ default: false })
+  isDefault: boolean;
+
+  @OneToMany(() => CalendarMemberEntity, (member) => member.calendar, {
+    cascade: true,
+  })
   members: CalendarMemberEntity[];
 }

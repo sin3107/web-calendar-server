@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 
 
 import { UsersRepository } from './users.repository';
-import { Provider, User } from './entities/user.entity';
+import { Provider, UserEntity } from './entities/user.entity';
 import { Errors } from 'common/errors/Errors';
 import { UserRegisterRequestDTO } from 'domain/auth/dtos/request/UserRegister.request.dto';
 import { UserRegisterResponseDTO } from 'domain/auth/dtos/response/UserRegister.response.dto';
@@ -46,7 +46,7 @@ export class UsersService {
 
   }
 
-  async findUserByEmail(email: string): Promise<User> {
+  async findUserByEmail(email: string): Promise<UserEntity> {
     const user = await this.usersRepository.selectUserByEmail(email, Provider.Local);
     if (!user) {
       throw new HttpException(Errors.User['USER_NOT_FOUND'], Errors.User['USER_NOT_FOUND'].statusCode);
@@ -54,7 +54,7 @@ export class UsersService {
     return user;
   }
 
-  async findUserById(id: number): Promise<User> {
+  async findUserById(id: number): Promise<UserEntity> {
     const user = await this.usersRepository.selectUserById(id);
     if (!user) {
       throw new HttpException(Errors.User['USER_NOT_FOUND'], Errors.User['USER_NOT_FOUND'].statusCode);

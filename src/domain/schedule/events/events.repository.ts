@@ -4,6 +4,7 @@ import { Repository, DataSource } from 'typeorm';
 import { EventEntity } from './entities/event.entity';
 import { EventRepeatRuleEntity } from './entities/event-repeat-rule.entity';
 import { generateRecurringEvents } from 'common/utils/repeatExpansion';
+import { CreateEventRequestDTO } from './dtos/request/CreateEvent.request.dto';
 
 @Injectable()
 export class EventsRepository {
@@ -15,7 +16,7 @@ export class EventsRepository {
     private readonly repeatRuleRepository: Repository<EventRepeatRuleEntity>,
 
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async findEventsInRange(calendarId: number, startDate: Date, endDate: Date): Promise<EventEntity[]> {
     const baseEvents = await this.eventRepository.createQueryBuilder('event')
@@ -29,17 +30,17 @@ export class EventsRepository {
       .andWhere('event.deletedAt IS NULL')
       .getMany();
 
-      const expandedEvents: EventEntity[] = [];
+    const expandedEvents: EventEntity[] = [];
 
-      for (const event of baseEvents) {
-        if (event.repeatRule) {
-          expandedEvents.push(...generateRecurringEvents(event, event.repeatRule, startDate, endDate));
-        } else {
-          expandedEvents.push(event);
-        }
+    for (const event of baseEvents) {
+      if (event.repeatRule) {
+        expandedEvents.push(...generateRecurringEvents(event, event.repeatRule, startDate, endDate));
+      } else {
+        expandedEvents.push(event);
       }
-  
-      return expandedEvents;
+    }
+
+    return expandedEvents;
   }
 
   async findById(id: number): Promise<EventEntity | null> {
@@ -49,19 +50,38 @@ export class EventsRepository {
     });
   }
 
-  async saveEvent(event: EventEntity): Promise<EventEntity> {
+  private buildEventEntity(dto: CreateEventRequestDTO): EventEntity {
+    return this.eventRepository.create({
+      calendar: { id: dto.calendarId },
+      title: dto.title,
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      location: dto.location,
+      isAllDay: dto.isAllDay,
+    });
+  }
+
+  async saveEvent(dto: CreateEventRequestDTO): Promise<EventEntity> {
+    const event = this.buildEventEntity(dto);
     return this.eventRepository.save(event);
   }
 
-  async saveRepeatRule(rule: EventRepeatRuleEntity): Promise<EventRepeatRuleEntity> {
-    return this.repeatRuleRepository.save(rule);
-  }
+  async saveEventWithRepeatRule(dto: CreateEventRequestDTO): Promise<EventEntity> {
+    return await this.dataSource.transaction(async (manager) => {
 
-  async saveEventWithRepeatRule(event: EventEntity, rule: EventRepeatRuleEntity): Promise<EventEntity> {
-    return await this.dataSource.transaction(async manager => {
+      const event = manager.create(EventEntity, this.buildEventEntity(dto));
       const savedEvent = await manager.save(EventEntity, event);
-      rule.event = savedEvent;
+
+      const rule = manager.create(EventRepeatRuleEntity, {
+        event: savedEvent,
+        repeatType: dto.repeatRule.repeatType,
+        repeatInterval: dto.repeatRule.repeatInterval,
+        repeatEndDate: dto.repeatRule.repeatEndDate,
+        isForever: dto.repeatRule.isForever ?? false,
+        repeatDaysOfWeek: dto.repeatRule.repeatDaysOfWeek,
+      });
       await manager.save(EventRepeatRuleEntity, rule);
+
       return savedEvent;
     });
   }
@@ -69,6 +89,10 @@ export class EventsRepository {
   async updateEvent(id: number, updatedEvent: Partial<EventEntity>): Promise<EventEntity> {
     await this.eventRepository.update(id, updatedEvent);
     return this.eventRepository.findOneBy({ id });
+  }
+
+  async updateRepeatRule(rule: EventRepeatRuleEntity): Promise<EventRepeatRuleEntity> {
+    return this.repeatRuleRepository.save(rule);
   }
 
   async deleteEvent(id: number): Promise<void> {

@@ -56,46 +56,30 @@ export class EventsService {
 
   // 일정 추가
   async createEvent(dto: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
-    if (dto.startTime > dto.endTime) {
-      throw new HttpException(
-        Errors.Event['INVALID_EVENT_TIME_RANGE'],
-        Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode,
-      );
-    }
-    const event = {
-      calendar: { id: dto.calendarId },
-      title: dto.title,
-      startTime: dto.startTime,
-      endTime: dto.endTime,
-      location: dto.location,
-      isAllDay: dto.isAllDay,
-    } as EventEntity;
-
-    let savedEvent: EventEntity;
-
-    if (dto.repeatRule) {
-      const repeatRule = new EventRepeatRuleEntity();
-      repeatRule.repeatType = dto.repeatRule.repeatType;
-      repeatRule.repeatInterval = dto.repeatRule.repeatInterval;
-      repeatRule.repeatEndDate = dto.repeatRule.repeatEndDate;
-      repeatRule.isForever = dto.repeatRule.isForever ?? false;
-      repeatRule.repeatDaysOfWeek = dto.repeatRule.repeatDaysOfWeek;
-
-      savedEvent = await this.eventRepository.saveEventWithRepeatRule(event, repeatRule);
-    } else {
-      savedEvent = await this.eventRepository.saveEvent(event);
-    }
-
-    return {
-      eventId: savedEvent.id,
-      title: savedEvent.title,
-      startTime: savedEvent.startTime,
-      endTime: savedEvent.endTime,
-      location: savedEvent.location,
-      isAllDay: savedEvent.isAllDay,
-    };
-
+  if (dto.startTime > dto.endTime) {
+    throw new HttpException(
+      Errors.Event['INVALID_EVENT_TIME_RANGE'],
+      Errors.Event['INVALID_EVENT_TIME_RANGE'].statusCode,
+    );
   }
+
+  let savedEvent: EventEntity;
+
+  if (dto.repeatRule) {
+    savedEvent = await this.eventRepository.saveEventWithRepeatRule(dto);
+  } else {
+    savedEvent = await this.eventRepository.saveEvent(dto);
+  }
+
+  return {
+    eventId: savedEvent.id,
+    title: savedEvent.title,
+    startTime: savedEvent.startTime,
+    endTime: savedEvent.endTime,
+    location: savedEvent.location,
+    isAllDay: savedEvent.isAllDay,
+  };
+}
 
   // 일정 수정
   async updateEvent(id: number, dto: UpdateEventRequestDTO): Promise<UpdateAndDeleteEventResponseDTO> {
@@ -140,7 +124,7 @@ export class EventsService {
     }
 
     const updatedRule = Object.assign(event.repeatRule, dto);
-    const saved = await this.eventRepository.saveRepeatRule(updatedRule);
+    const saved = await this.eventRepository.updateRepeatRule(updatedRule);
 
     return {
       repeatType: saved.repeatType,

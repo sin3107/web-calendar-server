@@ -28,7 +28,7 @@ import {
   @Entity({
     name: 'users',
   })
-  export class User extends CommonEntity {
+  export class UserEntity extends CommonEntity {
     @Column({ type: 'varchar', unique: false, nullable: false })
     email: string;
   
